@@ -183,6 +183,15 @@
                 
                 applyFormatting();
                 
+                const data = db.export();
+                const blob = new Blob([data], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'wack.db';
+                a.click();
+                URL.revokeObjectURL(url);
+                
                 btn.innerHTML = 'Refresh';
                 btn.disabled = false;
             } catch (error) {

@@ -1,4 +1,4 @@
-*.db
+wack.db
 *.xlsx
 *.csv
 __pycache__/
