@@ -42,9 +42,9 @@
         .size-item { display: flex; justify-content: space-between; padding: 6px 10px; background: #f8f9fa; border-radius: 4px; margin-bottom: 4px; font-size: 13px; }
         .loading { text-align: center; padding: 40px; color: #666; }
         .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        .layout { display: flex; flex-wrap: nowrap; }
+        .row { display: flex; flex-wrap: nowrap; }
         .sidebar { flex-shrink: 0; }
-        .main-content { flex-shrink: 0; }
+        .main { flex-grow: 1; }
         .section-title { font-weight: 600; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn-grid .btn { width: 100%; }
@@ -54,8 +54,8 @@
     <div class="container">
         <h1>WACK Registration Dashboard</h1>
         
-        <div style="display: flex; flex-direction: row; width: 100%;">
-            <div style="width: 35%;">
+        <div class="row">
+            <div class="sidebar" style="width: 35%;">
                 <div class="card">
                     <div class="section-title">Filters</div>
                     <div class="form-group">
@@ -101,7 +101,7 @@
                         <button class="btn btn-primary" id="runRScript">Export Full</button>
                     </div>
             </div>
-            <div style="width: 65%;">
+            <div class="main" style="width: 65%;">
                 <div class="card">
                     <div class="stats" id="stats"></div>
                     <div class="results-table">
