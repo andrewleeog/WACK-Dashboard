@@ -1,22 +1,27 @@
 # WACK Registration Dashboard
 
-An HTML dashboard for querying camper and sponsor registration data from SQLite, with Excel export capabilities.
+An HTML dashboard with Python Flask backend for querying camper and sponsor registration data from SQLite.
 
 ## Quick Start
 
-1. Start a local web server:
+1. Install dependencies:
    ```bash
-   python -m http.server 8000
+   pip install -r requirements.txt
    ```
 
-2. Open the dashboard:
+2. Run the server:
+   ```bash
+   python server.py
    ```
-   http://localhost:8000/dashboard.html
+
+3. Open the dashboard:
+   ```
+   http://localhost:8000
    ```
 
 ## Features
 
-- **Refresh**: Loads data from CSV files and applies formatting
+- **Refresh**: Loads data from CSV files and saves to wack.db
 - **Clear**: Resets all filters
 - **Export Current**: Exports filtered results to Excel
 - **Export Full**: Creates organized Excel reports by Church and Track
@@ -28,8 +33,7 @@ An HTML dashboard for querying camper and sponsor registration data from SQLite,
 
 ## Files
 
-- `dashboard.html` - Main dashboard
-- `wack.db` - SQLite database (auto-generated)
-- `wack_registration.R` - R script for Excel reports
-- `WACK_2025_Camper_Registration (1).csv` - Camper data
-- `WACK_2025_Sponsor_Registration (1).csv` - Sponsor data
+- `server.py` - Flask backend server
+- `dashboard.html` - Frontend dashboard
+- `wack_registration.py` - Standalone Python script for Excel reports
+- `requirements.txt` - Python dependencies

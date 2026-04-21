@@ -4,50 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WACK Registration Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; margin: 0; }
-        .container { max-width: 100%; margin: 0 auto; padding: 0; }
-        .container { max-width: 1600px; margin: 0 auto; }
-        h1 { color: #333; margin-bottom: 20px; }
-        h2 { color: #333; margin-bottom: 15px; font-size: 18px; }
-        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
-        .form-group label { font-weight: 600; margin-bottom: 5px; color: #555; font-size: 14px; }
-        .form-group select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background: white; }
-        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .container { max-width: 100%; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 10px; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { font-weight: 600; margin-bottom: 5px; color: #555; font-size: 14px; display: block; }
+        .form-group select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background: white; width: 100%; }
+        .btn { padding: 10px 16px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .btn-primary { background: #007bff; color: white; }
-        .btn-primary:hover { background: #0056b3; }
         .btn-success { background: #28a745; color: white; }
-        .btn-success:hover { background: #1e7e34; }
         .btn-warning { background: #ffc107; color: #333; }
-        .btn-warning:hover { background: #e0a800; }
         .btn-danger { background: #dc3545; color: white; }
-        .btn-danger:hover { background: #c82333; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .results-table { overflow-x: auto; max-height: 500px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; font-weight: 600; position: sticky; top: 0; }
-        tr:hover { background: #f8f9fa; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        .stat-box { background: #f8f9fa; padding: 12px; border-radius: 4px; text-align: center; }
-        .stat-number { font-size: 20px; font-weight: bold; color: #007bff; }
-        .stat-label { color: #666; font-size: 11px; text-transform: uppercase; }
-        .size-breakdown { margin-top: 15px; }
-        .size-breakdown h3 { font-size: 14px; color: #555; margin-bottom: 8px; }
-        .size-item { display: flex; justify-content: space-between; padding: 6px 10px; background: #f8f9fa; border-radius: 4px; margin-bottom: 4px; font-size: 13px; }
-        .loading { text-align: center; padding: 40px; color: #666; }
-        .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        .row { display: flex; width: 100%; max-width: 100%; }
-        .sidebar { width: 35%; min-width: 280px; flex: 0 0 35%; box-sizing: border-box; }
-        .main { width: 65%; flex: 1; box-sizing: border-box; }
-        .section-title { font-weight: 600; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .btn-grid .btn { width: 100%; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .stats { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .stat-box { background: #f8f9fa; padding: 12px; border-radius: 4px; text-align: center; flex: 1; min-width: 80px; }
+        .stat-number { font-size: 20px; font-weight: bold; color: #007bff; }
+        .stat-label { color: #666; font-size: 11px; }
+        .size-breakdown { margin-top: 10px; }
+        .size-item { display: flex; justify-content: space-between; padding: 6px 10px; background: #f8f9fa; border-radius: 4px; margin-bottom: 4px; font-size: 13px; }
+        .row { display: flex; width: 100%; }
+        .sidebar { width: 35%; min-width: 280px; flex: 0 0 35%; box-sizing: border-box; padding-right: 15px; }
+        .main { width: 65%; flex: 1; box-sizing: border-box; }
+        .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -55,31 +41,31 @@
         <h1>WACK Registration Dashboard</h1>
         
         <div class="row">
-            <div class="sidebar" style="width: 35%;">
+            <div class="sidebar">
                 <div class="card">
                     <div class="section-title">Filters</div>
                     <div class="form-group">
                         <label>Data Source</label>
-                        <select id="dataSource">
+                        <select id="dataSource" onchange="runQuery()">
                             <option value="camper">Camper Registration</option>
                             <option value="sponsor">Sponsor Registration</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Church</label>
-                        <select id="churchFilter">
+                        <select id="churchFilter" onchange="runQuery()">
                             <option value="">All Churches</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Track</label>
-                        <select id="trackFilter">
+                        <select id="trackFilter" onchange="runQuery()">
                             <option value="">All Tracks</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Gender</label>
-                        <select id="genderFilter">
+                        <select id="genderFilter" onchange="runQuery()">
                             <option value="">All</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
@@ -87,7 +73,7 @@
                     </div>
                     <div class="form-group">
                         <label>T-Shirt Size</label>
-                        <select id="sizeFilter">
+                        <select id="sizeFilter" onchange="runQuery()">
                             <option value="">All Sizes</option>
                         </select>
                     </div>
@@ -95,13 +81,15 @@
                 <div class="card">
                     <div class="section-title">Actions</div>
                     <div class="btn-grid">
-                        <button class="btn btn-danger" id="refreshBtn">Refresh</button>
-                        <button class="btn btn-warning" id="clearBtn">Clear</button>
-                        <button class="btn btn-success" id="exportBtn">Export Current</button>
-                        <button class="btn btn-primary" id="runRScript">Export Full</button>
+                        <button class="btn btn-danger" id="refreshBtn" onclick="refresh()">Refresh</button>
+                        <button class="btn btn-warning" id="clearBtn" onclick="clearFilters()">Clear</button>
+                        <button class="btn btn-success" id="exportBtn" onclick="exportCurrent()">Export Current</button>
+                        <button class="btn btn-primary" id="runRScript" onclick="exportFull()">Export Full</button>
                     </div>
+                </div>
             </div>
-            <div class="main" style="width: 65%;">
+            
+            <div class="main">
                 <div class="card">
                     <div class="stats" id="stats"></div>
                     <div class="results-table">
@@ -120,358 +108,145 @@
     </div>
 
     <script>
-        let db = null;
         let currentResults = [];
-        let isFormatted = false;
+        let isFormatted = true;
         
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
         
         async function init() {
-            try {
-                const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
-                
-                db = new SQL.Database();
-                setupEventListeners();
-                
-                await populateAndFormat();
-            } catch (error) {
-                console.error('Init error:', error);
-                document.querySelector('.container').innerHTML = '<div class="error">Failed to load: ' + error.message + '</div>';
-            }
+            await saveDB();
+            await populateFilters();
+            await runQuery();
         }
         
-        async function populateAndFormat() {
+        async function api(endpoint, data = {}) {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            return response.json();
+        }
+        
+        async function refresh() {
+            document.getElementById('refreshBtn').innerHTML = 'Loading...';
+            document.getElementById('refreshBtn').disabled = true;
+            await saveDB();
+            await populateFilters();
+            await runQuery();
+            document.getElementById('refreshBtn').innerHTML = 'Refresh';
+            document.getElementById('refreshBtn').disabled = false;
+        }
+        
+        async function saveDB() {
             const btn = document.getElementById('refreshBtn');
-            if (btn) {
-                btn.innerHTML = 'Loading...';
-                btn.disabled = true;
-            }
+            if (btn) btn.innerHTML = 'Loading...';
+            await api('/api/save');
+            if (btn) btn.innerHTML = 'Refresh';
+        }
+        
+        async function populateFilters() {
+            const table = 'camper';
+            const churchCol = 'Church';
+            const trackCol = 'Track';
+            const sizeCol = 'Size';
             
-            try {
-                db.run('DROP TABLE IF EXISTS camper');
-                db.run('DROP TABLE IF EXISTS sponsor');
-                
-                const camperRes = await fetch('WACK_2025_Camper_Registration (1).csv');
-                const camperCsv = await camperRes.text();
-                const camperData = parseCSV(camperCsv);
-                
-                const sponsorRes = await fetch('WACK_2025_Sponsor_Registration (1).csv');
-                const sponsorCsv = await sponsorRes.text();
-                const sponsorData = parseCSV(sponsorCsv);
-                
-                const campCols = Object.keys(camperData[0] || {});
-                const campColsSafe = campCols.map(c => '"' + c.replace(/"/g, '""') + '"');
-                db.run('CREATE TABLE camper (' + campColsSafe.map(c => c + ' TEXT').join(', ') + ')');
-                
-                camperData.forEach(row => {
-                    const vals = campCols.map(c => {
-                        const v = row[c] || '';
-                        return "'" + v.replace(/'/g, "''") + "'";
-                    }).join(', ');
-                    db.run('INSERT INTO camper (' + campColsSafe.join(', ') + ') VALUES (' + vals + ')');
-                });
-                
-                const sponsorCols = Object.keys(sponsorData[0] || {});
-                const sponsorColsSafe = sponsorCols.map(c => '"' + c.replace(/"/g, '""') + '"');
-                db.run('CREATE TABLE sponsor (' + sponsorColsSafe.map(c => c + ' TEXT').join(', ') + ')');
-                
-                sponsorData.forEach(row => {
-                    const vals = sponsorCols.map(c => {
-                        const v = row[c] || '';
-                        return "'" + v.replace(/'/g, "''") + "'";
-                    }).join(', ');
-                    db.run('INSERT INTO sponsor (' + sponsorColsSafe.join(', ') + ') VALUES (' + vals + ')');
-                });
-                
-                applyFormatting();
-                
-                populateFilters();
-                runQuery();
-                
-                if (btn) {
-                    btn.innerHTML = 'Refresh';
-                    btn.disabled = false;
-                }
-            } catch (error) {
-                if (btn) {
-                    btn.innerHTML = 'Refresh';
-                    btn.disabled = false;
-                }
-                console.error('Error:', error);
-            }
-        }
-        
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(l => l.trim());
-            if (lines.length < 2) return [];
-            const headers = parseCSVLine(lines[0]);
-            const data = [];
-            for (let i = 1; i < lines.length; i++) {
-                const values = parseCSVLine(lines[i]);
-                const row = {};
-                headers.forEach((h, idx) => row[h] = values[idx] || '');
-                data.push(row);
-            }
-            return data;
-        }
-        
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') { inQuotes = !inQuotes; }
-                else if (char === ',' && !inQuotes) {
-                    result.push(current.trim());
-                    current = '';
-                } else { current += char; }
-            }
-            result.push(current.trim());
-            return result;
-        }
-        
-        function checkIfFormatted() {
-            try {
-                if (!db) return;
-                const result = db.exec("PRAGMA table_info(camper)");
-                const columns = result[0] ? result[0].values.map(c => c[1]) : [];
-                isFormatted = columns.includes('Name') && columns.includes('Track') && columns.includes('Gender');
-            } catch (e) {
-                isFormatted = false;
-            }
-        }
-        
-        function populateFilters() {
+            const churches = await api('/api/query', {query: `SELECT DISTINCT "${churchCol}" FROM ${table} WHERE "${churchCol}" != '' ORDER BY "${churchCol}"`});
+            const tracks = await api('/api/query', {query: `SELECT DISTINCT "${trackCol}" FROM ${table} WHERE "${trackCol}" != '' ORDER BY "${trackCol}"`});
+            const sizes = await api('/api/query', {query: `SELECT DISTINCT "${sizeCol}" FROM ${table} WHERE "${sizeCol}" != '' ORDER BY "${sizeCol}"`});
+            
             const churchFilter = document.getElementById('churchFilter');
             const trackFilter = document.getElementById('trackFilter');
             const sizeFilter = document.getElementById('sizeFilter');
-            const dataSource = document.getElementById('dataSource').value;
             
-            const tableName = dataSource;
+            churchFilter.innerHTML = '<option value="">All Churches</option>';
+            (churches.results || []).forEach(r => { if (r[churchCol]) churchFilter.innerHTML += `<option value="${r[churchCol]}">${r[churchCol]}</option>`; });
             
-            let churchCol, trackCol, sizeCol, genderCol;
+            trackFilter.innerHTML = '<option value="">All Tracks</option>';
+            (tracks.results || []).forEach(r => { if (r[trackCol]) trackFilter.innerHTML += `<option value="${r[trackCol]}">${r[trackCol]}</option>`; });
             
-            if (isFormatted) {
-                churchCol = 'Church';
-                trackCol = 'Track';
-                sizeCol = 'Size';
-                genderCol = 'Gender';
-            } else {
-                churchCol = dataSource === 'camper' ? 'Child - Church' : 'Sponsor - Church';
-                trackCol = dataSource === 'camper' ? 'Child - Track Assignment' : 'Sponsor - Preferred Job Assignment';
-                sizeCol = dataSource === 'camper' ? 'Child - T-Shirt Size' : 'Sponsor - T-Shirt Size';
-                genderCol = dataSource === 'camper' ? 'Child - Gender' : 'Sponsor - Gender';
-            }
-            
-            const churchQuery = `SELECT DISTINCT "${churchCol}" FROM ${tableName} WHERE "${churchCol}" != '' AND "${churchCol}" IS NOT NULL ORDER BY "${churchCol}"`;
-            const trackQuery = `SELECT DISTINCT "${trackCol}" FROM ${tableName} WHERE "${trackCol}" != '' AND "${trackCol}" IS NOT NULL ORDER BY "${trackCol}"`;
-            const sizeQuery = `SELECT DISTINCT "${sizeCol}" FROM ${tableName} WHERE "${sizeCol}" != '' AND "${sizeCol}" IS NOT NULL ORDER BY "${sizeCol}"`;
-            
-            try {
-                let churches = db.exec(churchQuery);
-                churches = churches[0] ? churches[0].values.flat() : [];
-                
-                let tracks = db.exec(trackQuery);
-                tracks = tracks[0] ? tracks[0].values.flat() : [];
-                
-                let sizes = db.exec(sizeQuery);
-                sizes = sizes[0] ? sizes[0].values.flat() : [];
-                
-                churchFilter.innerHTML = '<option value="">All Churches</option>';
-                churches.forEach(c => {
-                    if (c) churchFilter.innerHTML += `<option value="${c}">${c}</option>`;
-                });
-                
-                trackFilter.innerHTML = '<option value="">All Tracks</option>';
-                tracks.forEach(t => {
-                    if (t) trackFilter.innerHTML += `<option value="${t}">${t}</option>`;
-                });
-                
-                sizeFilter.innerHTML = '<option value="">All Sizes</option>';
-                sizes.forEach(s => {
-                    if (s) sizeFilter.innerHTML += `<option value="${s}">${s}</option>`;
-                });
-            } catch (error) {
-                console.error('Populate filters error:', error);
-            }
+            sizeFilter.innerHTML = '<option value="">All Sizes</option>';
+            (sizes.results || []).forEach(r => { if (r[sizeCol]) sizeFilter.innerHTML += `<option value="${r[sizeCol]}">${r[sizeCol]}</option>`; });
         }
         
-        function setupEventListeners() {
-            
-            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
-            document.getElementById('clearBtn').addEventListener('click', clearFilters);
-            document.getElementById('refreshBtn').addEventListener('click', populateAndFormat);
-            document.getElementById('churchFilter').addEventListener('change', runQuery);
-            document.getElementById('trackFilter').addEventListener('change', runQuery);
-            document.getElementById('genderFilter').addEventListener('change', runQuery);
-            document.getElementById('sizeFilter').addEventListener('change', runQuery);
-            document.getElementById('dataSource').addEventListener('change', () => {
-                populateFilters();
-                runQuery();
-            });
-            
-            document.getElementById('runRScript').addEventListener('click', runRScript);
-        }
-        
-        function runQuery() {
+        async function runQuery() {
             const dataSource = document.getElementById('dataSource').value;
             const church = document.getElementById('churchFilter').value;
             const track = document.getElementById('trackFilter').value;
             const gender = document.getElementById('genderFilter').value;
             const size = document.getElementById('sizeFilter').value;
             
-            const tableName = dataSource;
+            let query = `SELECT * FROM ${dataSource} WHERE 1=1`;
+            if (church) query += ` AND "Church" = '${church.replace(/'/g, "''")}'`;
+            if (track) query += ` AND "Track" = '${track.replace(/'/g, "''")}'`;
+            if (gender) query += ` AND "Gender" = '${gender.replace(/'/g, "''")}'`;
+            if (size) query += ` AND "Size" = '${size.replace(/'/g, "''")}'`;
             
-            let churchCol, trackCol, genderCol, sizeCol;
+            const result = await api('/api/query', {query});
             
-            if (isFormatted) {
-                churchCol = 'Church';
-                trackCol = 'Track';
-                genderCol = 'Gender';
-                sizeCol = 'Size';
-            } else {
-                churchCol = dataSource === 'camper' ? 'Child - Church' : 'Sponsor - Church';
-                trackCol = dataSource === 'camper' ? 'Child - Track Assignment' : 'Sponsor - Preferred Job Assignment';
-                genderCol = dataSource === 'camper' ? 'Child - Gender' : 'Sponsor - Gender';
-                sizeCol = dataSource === 'camper' ? 'Child - T-Shirt Size' : 'Sponsor - T-Shirt Size';
-            }
+            const data = result.results || [];
+            currentResults = data;
             
-            let query = `SELECT * FROM ${tableName} WHERE 1=1`;
-            
-            if (church) query += ` AND "${churchCol}" = '${church.replace(/'/g, "''")}'`;
-            if (track) query += ` AND "${trackCol}" = '${track.replace(/'/g, "''")}'`;
-            if (gender) query += ` AND "${genderCol}" = '${gender.replace(/'/g, "''")}'`;
-            if (size) query += ` AND "${sizeCol}" = '${size.replace(/'/g, "''")}'`;
-            
-            try {
-                const results = db.exec(query);
-                if (results.length === 0) {
-                    currentResults = [];
-                    renderTable([], []);
-                    updateStats([]);
-                    updateSizeBreakdown([]);
-                } else {
-                    const columns = results[0].columns;
-                    const rows = results[0].values;
-                    currentResults = rows.map(row => {
-                        const obj = {};
-                        columns.forEach((col, idx) => obj[col] = row[idx]);
-                        return obj;
-                    });
-                    renderTable(columns, rows);
-                    updateStats(currentResults);
-                    updateSizeBreakdown(currentResults);
-                }
-            } catch (error) {
-                showError('Query error: ' + error.message);
-            }
+            const columns = result.columns || [];
+            renderTable(columns, data);
+            updateStats(data);
+            updateSizeBreakdown(data);
         }
         
         function renderTable(columns, rows) {
             const thead = document.getElementById('tableHead');
             const tbody = document.getElementById('tableBody');
-            
             thead.innerHTML = '';
             tbody.innerHTML = '';
             
-            if (columns.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="100%" style="text-align:center;color:#666;">No results</td></tr>';
+            if (!columns.length) {
+                tbody.innerHTML = '<tr><td colspan="100" style="text-align:center;color:#666;">No results</td></tr>';
                 return;
             }
             
-            const headerRow = document.createElement('tr');
-            columns.forEach(col => {
-                const th = document.createElement('th');
-                th.textContent = col;
-                headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
+            let headerRow = '<tr>';
+            columns.forEach(col => headerRow += `<th>${col}</th>`);
+            headerRow += '</tr>';
+            thead.innerHTML = headerRow;
             
+            let bodyHtml = '';
             rows.forEach(row => {
-                const tr = document.createElement('tr');
-                row.forEach(cell => {
-                    const td = document.createElement('td');
-                    td.textContent = cell || '';
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
+                bodyHtml += '<tr>';
+                columns.forEach(col => bodyHtml += `<td>${row[col] || ''}</td>`);
+                bodyHtml += '</tr>';
             });
+            tbody.innerHTML = bodyHtml;
         }
         
         function updateStats(data) {
             const stats = document.getElementById('stats');
-            stats.innerHTML = '';
-            
-            const dataSource = document.getElementById('dataSource').value;
-            
-            let genderCol;
-            if (isFormatted) {
-                genderCol = 'Gender';
-            } else {
-                genderCol = dataSource === 'camper' ? 'Child - Gender' : 'Sponsor - Gender';
-            }
-            
             const total = data.length;
-            const maleCount = data.filter(d => d[genderCol] === 'Male').length;
-            const femaleCount = data.filter(d => d[genderCol] === 'Female').length;
+            const maleCount = data.filter(d => d['Gender'] === 'Male').length;
+            const femaleCount = data.filter(d => d['Gender'] === 'Female').length;
             
             stats.innerHTML = `
-                <div class="stat-box">
-                    <div class="stat-number">${total}</div>
-                    <div class="stat-label">Total</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">${maleCount}</div>
-                    <div class="stat-label">Male</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">${femaleCount}</div>
-                    <div class="stat-label">Female</div>
-                </div>
+                <div class="stat-box"><div class="stat-number">${total}</div><div class="stat-label">Total</div></div>
+                <div class="stat-box"><div class="stat-number">${maleCount}</div><div class="stat-label">Male</div></div>
+                <div class="stat-box"><div class="stat-number">${femaleCount}</div><div class="stat-label">Female</div></div>
             `;
         }
         
         function updateSizeBreakdown(data) {
             const breakdown = document.getElementById('sizeBreakdown');
-            const dataSource = document.getElementById('dataSource').value;
-            let sizeCol = isFormatted ? 'Size' : (dataSource === 'camper' ? 'Child - T-Shirt Size' : 'Sponsor - T-Shirt Size');
-            
             const sizeCounts = {};
             data.forEach(d => {
-                const s = d[sizeCol];
+                const s = d['Size'];
                 if (s) sizeCounts[s] = (sizeCounts[s] || 0) + 1;
             });
             
-            const sortedSizes = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]);
-            
-            if (sortedSizes.length > 0) {
-                let html = '';
-                sortedSizes.forEach(([size, count]) => {
-                    html += `<div class="size-item"><span>${size}</span><span>${count}</span></div>`;
-                });
-                breakdown.innerHTML = html;
-            } else {
-                breakdown.innerHTML = '<div class="size-item"><span>No data</span><span>-</span></div>';
-            }
-        }
-        
-        function exportToExcel() {
-            if (currentResults.length === 0) {
-                alert('No data to export. Run a query first.');
-                return;
-            }
-            
-            const dataSource = document.getElementById('dataSource').value;
-            const ws = XLSX.utils.json_to_sheet(currentResults);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, dataSource === 'camper' ? 'Campers' : 'Sponsors');
-            
-            const church = document.getElementById('churchFilter').value;
-            const track = document.getElementById('trackFilter').value;
-            const defaultName = church || track || 'query';
-            
-            XLSX.writeFile(wb, `WACK_${dataSource}_${defaultName}_${new Date().toISOString().split('T')[0]}.xlsx`);
+            const sorted = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]);
+            let html = '';
+            sorted.forEach(([size, count]) => {
+                html += `<div class="size-item"><span>${size}</span><span>${count}</span></div>`;
+            });
+            breakdown.innerHTML = html || '<div class="size-item"><span>No data</span></div>';
         }
         
         function clearFilters() {
@@ -479,154 +254,76 @@
             document.getElementById('trackFilter').value = '';
             document.getElementById('genderFilter').value = '';
             document.getElementById('sizeFilter').value = '';
-            if (db) runQuery();
+            runQuery();
         }
         
-        function applyFormatting() {
-            try {
-                db.run(`
-                    CREATE TABLE camper_new AS
-                    SELECT 
-                        "Child - Person's Name - First Name" || ' ' || "Child - Person's Name - Last Name" AS Name,
-                        "Child - Gender" AS Gender,
-                        "Child - Last Grade Completed" AS Grade,
-                        "Child - Medical Information/Allergies" AS "Medical Info",
-                        CASE WHEN "Child - Church" = 'Other' THEN "Child - Church Name" ELSE "Child - Church" END AS Church,
-                        CASE 
-                            WHEN "Child - Track Assignment" LIKE '%PHOTOGRAPHY%' THEN 'PHOTOGRAPHY'
-                            WHEN "Child - Track Assignment" LIKE '%STOMP%' THEN 'STOMP'
-                            WHEN "Child - Track Assignment" LIKE '%DRAMA%' THEN 'DRAMA'
-                            ELSE "Child - Track Assignment"
-                        END AS Track,
-                        "Child - T-Shirt Size" AS Size,
-                        Email
-                    FROM camper
-                `);
-                
-                db.run(`
-                    CREATE TABLE sponsor_new AS
-                    SELECT 
-                        "Sponsor - Person's Name - First Name" || ' ' || "Sponsor - Person's Name - Last Name" AS Name,
-                        "Sponsor - Gender" AS Gender,
-                        CASE WHEN "Sponsor - Church" = 'Other' THEN "Sponsor - Church Name" ELSE "Sponsor - Church" END AS Church,
-                        CASE WHEN "Sponsor -" IS NOT NULL THEN "Sponsor -" END AS Type,
-                        "Sponsor - Preferred Job Assignment" AS "Job Preference",
-                        "Sponsor - Preferred Job Assignment Details" AS "Job Details",
-                        "Sponsor - T-Shirt Size" AS Size,
-                        Email
-                    FROM sponsor
-                `);
-                
-                db.run('DROP TABLE IF EXISTS camper');
-                db.run('DROP TABLE IF EXISTS sponsor');
-                db.run('ALTER TABLE camper_new RENAME TO camper');
-                db.run('ALTER TABLE sponsor_new RENAME TO sponsor');
-                
-                isFormatted = true;
-                populateFilters();
-                runQuery();
-            } catch (error) {
-                console.error('Format error:', error);
+        function exportCurrent() {
+            if (currentResults.length === 0) {
+                alert('No data to export');
+                return;
             }
+            const dataSource = document.getElementById('dataSource').value;
+            const ws = XLSX.utils.json_to_sheet(currentResults);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, dataSource);
+            XLSX.writeFile(wb, `WACK_${dataSource}.xlsx`);
         }
         
-        function showError(message) {
-            const container = document.querySelector('.container');
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.textContent = message;
-            container.insertBefore(errorDiv, container.firstChild);
-        }
-        
-function runRScript() {
-            const btn = document.getElementById('runRScript');
-            btn.innerHTML = 'Running...';
-            btn.disabled = true;
+        async function exportFull() {
+            document.getElementById('runRScript').innerHTML = 'Running...';
+            document.getElementById('runRScript').disabled = true;
             
-            try {
-                applyFormatting();
+            const camperResult = await api('/api/query', {query: 'SELECT * FROM camper'});
+            const sponsorResult = await api('/api/query', {query: 'SELECT * FROM sponsor'});
+            
+            const camperData = camperResult.results || [];
+            const sponsorData = sponsorResult.results || [];
+            
+            const churchWb = XLSX.utils.book_new();
+            const churches = [...new Set(camperData.map(r => r.Church).filter(c => c))].sort();
+            
+            churches.forEach(church => {
+                const campers = camperData.filter(r => r.Church === church);
+                const sponsors = sponsorData.filter(r => r.Church === church);
+                const ws = XLSX.utils.aoa_to_sheet([[]]);
                 
-                const camperRes = db.exec("SELECT * FROM camper");
-                const sponsorRes = db.exec("SELECT * FROM sponsor");
+                XLSX.utils.sheet_add_aoa(ws, [Object.keys(campers[0] || {})], {origin: 'A1'});
+                campers.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [Object.values(r)], {origin: 'A' + (i + 2)}));
                 
-                if (!camperRes.length || !sponsorRes.length) {
-                    alert('No data found');
-                    btn.innerHTML = 'Export Full';
-                    return;
+                if (sponsors.length > 0) {
+                    XLSX.utils.sheet_add_aoa(ws, Array(Object.keys(campers[0] || {}).length).fill(''), {origin: 'A' + (campers.length + 2)});
+                    XLSX.utils.sheet_add_aoa(ws, [Object.keys(sponsors[0] || {})], {origin: 'A' + (campers.length + 3)});
+                    sponsors.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [Object.values(r)], {origin: 'A' + (campers.length + 4 + i)}));
                 }
                 
-                const camperData = camperRes[0];
-                const sponsorData = sponsorRes[0];
-                
-                const churchColIdx = camperData.columns.indexOf('Church');
-                const trackColIdx = camperData.columns.indexOf('Track');
-                const sizeColIdx = camperData.columns.indexOf('Size');
-                const sponsorChurchColIdx = sponsorData.columns.indexOf('Church');
-                
-                if (churchColIdx === -1) {
-                    alert('Need to format first');
-                    btn.innerHTML = 'Export Full';
-                    btn.disabled = false;
-                    return;
+                const sizeCounts = {};
+                campers.forEach(r => { if (r.Size) sizeCounts[r.Size] = (sizeCounts[r.Size] || 0) + 1; });
+                const sizeText = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]).map(([s, c]) => s + ': ' + c).join(', ');
+                if (sizeText) {
+                    const row = Array(Object.keys(campers[0] || {}).length).fill('');
+                    row[0] = 'T-Shirt Sizes: ' + sizeText;
+                    XLSX.utils.sheet_add_aoa(ws, [row], {origin: 'A' + (campers.length + (sponsors.length > 0 ? sponsors.length + 4 : 2))});
                 }
                 
-                const churchWb = XLSX.utils.book_new();
-                const churches = [...new Set(camperData.values.map(r => r[churchColIdx] || '').filter(c => c))];
-                churches.sort();
-                
-                churches.forEach(church => {
-                    const campers = camperData.values.filter(r => r[churchColIdx] === church);
-                    const sponsors = sponsorData.values.filter(r => sponsorChurchColIdx !== -1 && r[sponsorChurchColIdx] === church);
-                    
-                    const rows = [];
-                    rows.push(camperData.columns);
-                    campers.forEach(r => rows.push(r.slice()));
-                    
-                    if (sponsors.length > 0) {
-                        rows.push(Array(camperData.columns.length).fill(''));
-                        rows.push(Array(camperData.columns.length).fill(''));
-                        rows.push(sponsorData.columns);
-                        sponsors.forEach(r => rows.push(r.slice()));
-                    }
-                    
-                    if (sizeColIdx !== -1 && campers.length > 0) {
-                        const sizeCounts = {};
-                        let total = 0;
-                        campers.forEach(r => {
-                            const s = r[sizeColIdx];
-                            if (s) { sizeCounts[s] = (sizeCounts[s] || 0) + 1; total++; }
-                        });
-                        
-                        rows.push([]);
-                        Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]).forEach(([s, c]) => rows.push([s, c]));
-                        if (Object.keys(sizeCounts).length > 0) rows.push(['Total', total]);
-                    }
-                    
-                    const ws = XLSX.utils.aoa_to_sheet(rows);
-                    XLSX.utils.book_append_sheet(churchWb, ws, church.substring(0, 31));
-                });
-                XLSX.writeFile(churchWb, 'WACK_2025_Camper_Registration_By_Church.xlsx');
-                
-                const trackWb = XLSX.utils.book_new();
-                const tracks = [...new Set(camperData.values.map(r => r[trackColIdx] || '').filter(t => t))];
-                tracks.sort();
-                tracks.forEach(track => {
-                    const campers = camperData.values.filter(r => r[trackColIdx] === track);
-                    const rows = [camperData.columns, ...campers.map(r => r.slice())];
-                    const ws = XLSX.utils.aoa_to_sheet(rows);
-                    XLSX.utils.book_append_sheet(trackWb, ws, track.substring(0, 31));
-                });
-                XLSX.writeFile(trackWb, 'WACK_2025_Camper_Registration_By_Track.xlsx');
-                
-                btn.innerHTML = 'Export Full';
-                btn.disabled = false;
-                alert('Created files');
-            } catch (error) {
-                btn.innerHTML = 'Export Full';
-                btn.disabled = false;
-                alert('Error: ' + error.message);
-            }
-}
+                XLSX.utils.book_append_sheet(churchWb, ws, church.substring(0, 31));
+            });
+            XLSX.writeFile(churchWb, 'WACK_2025_Camper_Registration_By_Church.xlsx');
+            
+            const trackWb = XLSX.utils.book_new();
+            const tracks = [...new Set(camperData.map(r => r.Track).filter(t => t))].sort();
+            tracks.forEach(track => {
+                const campers = camperData.filter(r => r.Track === track);
+                const ws = XLSX.utils.aoa_to_sheet([[]]);
+                XLSX.utils.sheet_add_aoa(ws, [Object.keys(campers[0] || {})], {origin: 'A1'});
+                campers.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [Object.values(r)], {origin: 'A' + (i + 2)}));
+                XLSX.utils.book_append_sheet(trackWb, ws, track.substring(0, 31));
+            });
+            XLSX.writeFile(trackWb, 'WACK_2025_Camper_Registration_By_Track.xlsx');
+            
+            document.getElementById('runRScript').innerHTML = 'Export Full';
+            document.getElementById('runRScript').disabled = false;
+            alert('Created Excel files');
+        }
     </script>
 </body>
 </html>
