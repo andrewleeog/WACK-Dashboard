@@ -42,9 +42,9 @@
         .size-item { display: flex; justify-content: space-between; padding: 6px 10px; background: #f8f9fa; border-radius: 4px; margin-bottom: 4px; font-size: 13px; }
         .loading { text-align: center; padding: 40px; color: #666; }
         .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        .row { display: flex; flex-wrap: nowrap; }
-        .sidebar { flex-shrink: 0; }
-        .main { flex-grow: 1; }
+        .row { display: flex; width: 100%; max-width: 100%; }
+        .sidebar { width: 35%; min-width: 280px; flex: 0 0 35%; box-sizing: border-box; }
+        .main { width: 65%; flex: 1; box-sizing: border-box; }
         .section-title { font-weight: 600; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn-grid .btn { width: 100%; }
@@ -142,8 +142,10 @@
         
         async function populateAndFormat() {
             const btn = document.getElementById('refreshBtn');
-            btn.innerHTML = 'Loading...';
-            btn.disabled = true;
+            if (btn) {
+                btn.innerHTML = 'Loading...';
+                btn.disabled = true;
+            }
             
             try {
                 db.run('DROP TABLE IF EXISTS camper');
@@ -183,21 +185,19 @@
                 
                 applyFormatting();
                 
-                const data = db.export();
-                const blob = new Blob([data], { type: 'application/octet-stream' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'wack.db';
-                a.click();
-                URL.revokeObjectURL(url);
+                populateFilters();
+                runQuery();
                 
-                btn.innerHTML = 'Refresh';
-                btn.disabled = false;
+                if (btn) {
+                    btn.innerHTML = 'Refresh';
+                    btn.disabled = false;
+                }
             } catch (error) {
-                btn.innerHTML = 'Refresh';
-                btn.disabled = false;
-                alert('Error: ' + error.message);
+                if (btn) {
+                    btn.innerHTML = 'Refresh';
+                    btn.disabled = false;
+                }
+                console.error('Error:', error);
             }
         }
         
