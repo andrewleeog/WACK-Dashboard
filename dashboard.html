@@ -22,9 +22,14 @@
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .btn-grid .btn { width: 100%; }
         .results-table { margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+        th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
         th { background: #f8f9fa; font-weight: 600; }
+        tbody tr:nth-child(even) td { background: #f8f9fa; }
+        tbody tr:nth-child(odd) td { background: white; }
+        tr.expanded td, tr.selected td { white-space: normal !important; overflow: visible !important; text-overflow: unset !important; word-wrap: break-word; min-height: 24px; background: #e7f3ff !important; }
+        tr.expanded td span, tr.selected td span { white-space: normal !important; display: block; }
+        tbody tr:not(.expanded):not(.selected):hover td { background: #e0e0e0; }
         .stats { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
         .stat-box { background: #f8f9fa; padding: 8px; border-radius: 4px; text-align: center; flex: 1; min-width: 70px; }
         .stat-number { font-size: 18px; font-weight: bold; color: #007bff; }
@@ -201,11 +206,19 @@
         
         function formatData(data, source) {
             const cols = source === 'camper' ? CAMPER_COLS : SPONSOR_COLS;
-            return data.map(row => {
-                const formatted = {};
-                cols.forEach(col => { formatted[col] = row[col] || ''; });
-                return formatted;
+            let formatted = data.map(row => {
+                const f = {};
+                cols.forEach(col => {
+                    f[col] = row[col] || '';
+                });
+                return f;
             });
+            formatted.sort((a, b) => {
+                const nameA = a.Name.split(' ').slice(1).join(' ') || a.Name;
+                const nameB = b.Name.split(' ').slice(1).join(' ') || b.Name;
+                return nameA.localeCompare(nameB);
+            });
+            return formatted;
         }
         
         function renderTable(columns, rows) {
@@ -225,21 +238,36 @@
             thead.innerHTML = headerRow;
             
             let bodyHtml = '';
-            rows.forEach(row => {
-                bodyHtml += '<tr>';
-                columns.forEach(col => bodyHtml += `<td>${row[col] || ''}</td>`);
+            rows.forEach((row, i) => {
+                bodyHtml += `<tr data-index="${i}">`;
+                columns.forEach(col => bodyHtml += `<td><span>${row[col] || ''}</span></td>`);
                 bodyHtml += '</tr>';
             });
             tbody.innerHTML = bodyHtml;
             formatTable();
+            
+            tbody.querySelectorAll('tr').forEach(tr => {
+                tr.addEventListener('click', () => toggleRow(tr));
+            });
+        }
+        
+        let selectedRow = null;
+        
+        function toggleRow(row) {
+            if (selectedRow === row) {
+                row.classList.remove('expanded', 'selected');
+                selectedRow = null;
+            } else {
+                if (selectedRow) selectedRow.classList.remove('expanded', 'selected');
+                row.classList.add('expanded', 'selected');
+                selectedRow = row;
+            }
         }
         
         function formatTable() {
             const tbody = document.getElementById('tableBody');
-            const rows = tbody.querySelectorAll('tr');
-            rows.forEach((row, i) => {
-                row.style.background = i % 2 === 0 ? 'white' : '#f8f9fa';
-            });
+            tbody.querySelectorAll('tr.expanded').forEach(tr => tr.classList.remove('expanded', 'selected'));
+            selectedRow = null;
         }
         
         function updateStats(data) {
@@ -312,19 +340,31 @@
                 XLSX.utils.sheet_add_aoa(ws, [CAMPER_COLS], {origin: 'A1'});
                 campers.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [CAMPER_COLS.map(c => r[c])], {origin: 'A' + (i + 2)}));
                 
-                if (sponsors.length > 0) {
-                    XLSX.utils.sheet_add_aoa(ws, Array(CAMPER_COLS.length).fill(''), {origin: 'A' + (campers.length + 2)});
-                    XLSX.utils.sheet_add_aoa(ws, [SPONSOR_COLS], {origin: 'A' + (campers.length + 3)});
-                    sponsors.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [SPONSOR_COLS.map(c => r[c])], {origin: 'A' + (campers.length + 4 + i)}));
-                }
-                
                 const sizeCounts = {};
                 campers.forEach(r => { if (r.Size) sizeCounts[r.Size] = (sizeCounts[r.Size] || 0) + 1; });
-                const sizeText = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]).map(([s, c]) => s + ': ' + c).join(', ');
-                if (sizeText) {
-                    const row = Array(CAMPER_COLS.length).fill('');
-                    row[0] = 'T-Shirt Sizes: ' + sizeText;
-                    XLSX.utils.sheet_add_aoa(ws, [row], {origin: 'A' + (campers.length + (sponsors.length > 0 ? sponsors.length + 4 : 2))});
+                const sortedSizes = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]);
+                
+                if (sponsors.length > 0) {
+                    const sponsorRow = campers.length + 2;
+                    XLSX.utils.sheet_add_aoa(ws, Array(CAMPER_COLS.length).fill(''), {origin: 'A' + sponsorRow});
+                    XLSX.utils.sheet_add_aoa(ws, [SPONSOR_COLS], {origin: 'A' + (sponsorRow + 1)});
+                    sponsors.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [SPONSOR_COLS.map(c => r[c])], {origin: 'A' + (sponsorRow + 2 + i)}));
+                    
+                    const sizeRow = sponsorRow + 2 + sponsors.length;
+                    const sizeRowData = [];
+                    CAMPER_COLS.forEach((_, i) => sizeRowData.push(''));
+                    sortedSizes.forEach(([size, count], i) => {
+                        if (i < sizeRowData.length) sizeRowData[i] = size + ': ' + count;
+                    });
+                    XLSX.utils.sheet_add_aoa(ws, [sizeRowData], {origin: 'A' + sizeRow});
+                } else {
+                    const sizeRow = campers.length + 2;
+                    const sizeRowData = [];
+                    CAMPER_COLS.forEach((_, i) => sizeRowData.push(''));
+                    sortedSizes.forEach(([size, count], i) => {
+                        if (i < sizeRowData.length) sizeRowData[i] = size + ': ' + count;
+                    });
+                    XLSX.utils.sheet_add_aoa(ws, [sizeRowData], {origin: 'A' + sizeRow});
                 }
                 
                 XLSX.utils.book_append_sheet(churchWb, ws, church.substring(0, 31));
