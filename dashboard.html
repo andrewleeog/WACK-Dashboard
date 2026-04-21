@@ -21,18 +21,20 @@
         .btn-danger { background: #dc3545; color: white; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .btn-grid .btn { width: 100%; }
+        .results-table { margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #eee; }
+        th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #f8f9fa; font-weight: 600; }
-        .stats { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .stat-box { background: #f8f9fa; padding: 12px; border-radius: 4px; text-align: center; flex: 1; min-width: 80px; }
-        .stat-number { font-size: 20px; font-weight: bold; color: #007bff; }
-        .stat-label { color: #666; font-size: 11px; }
-        .size-breakdown { margin-top: 10px; }
-        .size-item { display: flex; justify-content: space-between; padding: 6px 10px; background: #f8f9fa; border-radius: 4px; margin-bottom: 4px; font-size: 13px; }
+        .stats { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+        .stat-box { background: #f8f9fa; padding: 8px; border-radius: 4px; text-align: center; flex: 1; min-width: 70px; }
+        .stat-number { font-size: 18px; font-weight: bold; color: #007bff; }
+        .stat-label { color: #666; font-size: 10px; }
+        .size-breakdown { display: flex; flex-wrap: wrap; gap: 6px; }
+        .size-item { display: flex; justify-content: space-between; padding: 4px 8px; background: #f8f9fa; border-radius: 4px; font-size: 12px; }
         .row { display: flex; width: 100%; }
         .sidebar { width: 35%; min-width: 280px; flex: 0 0 35%; box-sizing: border-box; padding-right: 15px; }
         .main { width: 65%; flex: 1; box-sizing: border-box; }
+        .data-scroll { max-height: 400px; overflow-y: auto; }
         .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 15px; }
     </style>
 </head>
@@ -92,7 +94,7 @@
             <div class="main">
                 <div class="card">
                     <div class="stats" id="stats"></div>
-                    <div class="results-table">
+                    <div class="results-table data-scroll">
                         <table id="resultsTable">
                             <thead id="tableHead"></thead>
                             <tbody id="tableBody"></tbody>
@@ -109,7 +111,9 @@
 
     <script>
         let currentResults = [];
-        let isFormatted = true;
+        
+        const CAMPER_COLS = ['Name', 'Gender', 'Grade', 'Church', 'Track', 'Size', 'Medical Info', 'Email'];
+        const SPONSOR_COLS = ['Name', 'Gender', 'Type', 'Job Details', 'Church', 'Job Preference', 'Size', 'Email'];
         
         document.addEventListener('DOMContentLoaded', () => {
             init();
@@ -186,13 +190,22 @@
             
             const result = await api('/api/query', {query});
             
-            const data = result.results || [];
+            const data = formatData(result.results || [], dataSource);
             currentResults = data;
             
-            const columns = result.columns || [];
+            const columns = dataSource === 'camper' ? CAMPER_COLS : SPONSOR_COLS;
             renderTable(columns, data);
             updateStats(data);
             updateSizeBreakdown(data);
+        }
+        
+        function formatData(data, source) {
+            const cols = source === 'camper' ? CAMPER_COLS : SPONSOR_COLS;
+            return data.map(row => {
+                const formatted = {};
+                cols.forEach(col => { formatted[col] = row[col] || ''; });
+                return formatted;
+            });
         }
         
         function renderTable(columns, rows) {
@@ -218,6 +231,15 @@
                 bodyHtml += '</tr>';
             });
             tbody.innerHTML = bodyHtml;
+            formatTable();
+        }
+        
+        function formatTable() {
+            const tbody = document.getElementById('tableBody');
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((row, i) => {
+                row.style.background = i % 2 === 0 ? 'white' : '#f8f9fa';
+            });
         }
         
         function updateStats(data) {
@@ -244,7 +266,7 @@
             const sorted = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]);
             let html = '';
             sorted.forEach(([size, count]) => {
-                html += `<div class="size-item"><span>${size}</span><span>${count}</span></div>`;
+                html += `<div class="size-item"><span>${size}: (</span><span>${count})</span></div>`;
             });
             breakdown.innerHTML = html || '<div class="size-item"><span>No data</span></div>';
         }
@@ -276,8 +298,8 @@
             const camperResult = await api('/api/query', {query: 'SELECT * FROM camper'});
             const sponsorResult = await api('/api/query', {query: 'SELECT * FROM sponsor'});
             
-            const camperData = camperResult.results || [];
-            const sponsorData = sponsorResult.results || [];
+            const camperData = formatData(camperResult.results || [], 'camper');
+            const sponsorData = formatData(sponsorResult.results || [], 'sponsor');
             
             const churchWb = XLSX.utils.book_new();
             const churches = [...new Set(camperData.map(r => r.Church).filter(c => c))].sort();
@@ -287,20 +309,20 @@
                 const sponsors = sponsorData.filter(r => r.Church === church);
                 const ws = XLSX.utils.aoa_to_sheet([[]]);
                 
-                XLSX.utils.sheet_add_aoa(ws, [Object.keys(campers[0] || {})], {origin: 'A1'});
-                campers.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [Object.values(r)], {origin: 'A' + (i + 2)}));
+                XLSX.utils.sheet_add_aoa(ws, [CAMPER_COLS], {origin: 'A1'});
+                campers.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [CAMPER_COLS.map(c => r[c])], {origin: 'A' + (i + 2)}));
                 
                 if (sponsors.length > 0) {
-                    XLSX.utils.sheet_add_aoa(ws, Array(Object.keys(campers[0] || {}).length).fill(''), {origin: 'A' + (campers.length + 2)});
-                    XLSX.utils.sheet_add_aoa(ws, [Object.keys(sponsors[0] || {})], {origin: 'A' + (campers.length + 3)});
-                    sponsors.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [Object.values(r)], {origin: 'A' + (campers.length + 4 + i)}));
+                    XLSX.utils.sheet_add_aoa(ws, Array(CAMPER_COLS.length).fill(''), {origin: 'A' + (campers.length + 2)});
+                    XLSX.utils.sheet_add_aoa(ws, [SPONSOR_COLS], {origin: 'A' + (campers.length + 3)});
+                    sponsors.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [SPONSOR_COLS.map(c => r[c])], {origin: 'A' + (campers.length + 4 + i)}));
                 }
                 
                 const sizeCounts = {};
                 campers.forEach(r => { if (r.Size) sizeCounts[r.Size] = (sizeCounts[r.Size] || 0) + 1; });
                 const sizeText = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]).map(([s, c]) => s + ': ' + c).join(', ');
                 if (sizeText) {
-                    const row = Array(Object.keys(campers[0] || {}).length).fill('');
+                    const row = Array(CAMPER_COLS.length).fill('');
                     row[0] = 'T-Shirt Sizes: ' + sizeText;
                     XLSX.utils.sheet_add_aoa(ws, [row], {origin: 'A' + (campers.length + (sponsors.length > 0 ? sponsors.length + 4 : 2))});
                 }
@@ -314,8 +336,8 @@
             tracks.forEach(track => {
                 const campers = camperData.filter(r => r.Track === track);
                 const ws = XLSX.utils.aoa_to_sheet([[]]);
-                XLSX.utils.sheet_add_aoa(ws, [Object.keys(campers[0] || {})], {origin: 'A1'});
-                campers.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [Object.values(r)], {origin: 'A' + (i + 2)}));
+                XLSX.utils.sheet_add_aoa(ws, [CAMPER_COLS], {origin: 'A1'});
+                campers.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [CAMPER_COLS.map(c => r[c])], {origin: 'A' + (i + 2)}));
                 XLSX.utils.book_append_sheet(trackWb, ws, track.substring(0, 31));
             });
             XLSX.writeFile(trackWb, 'WACK_2025_Camper_Registration_By_Track.xlsx');
