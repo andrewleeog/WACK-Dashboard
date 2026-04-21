@@ -118,7 +118,7 @@
         let currentResults = [];
         
         const CAMPER_COLS = ['Name', 'Gender', 'Grade', 'Church', 'Track', 'Size', 'Medical Info', 'Email'];
-        const SPONSOR_COLS = ['Name', 'Gender', 'Type', 'Job Details', 'Church', 'Job Preference', 'Size', 'Email'];
+        const SPONSOR_COLS = ['Name', 'Gender', 'Type', 'Church', 'Job Preference', 'Size', 'Email', 'Job Details'];
         
         document.addEventListener('DOMContentLoaded', () => {
             init();
@@ -342,6 +342,7 @@
                 
                 const sizeCounts = {};
                 campers.forEach(r => { if (r.Size) sizeCounts[r.Size] = (sizeCounts[r.Size] || 0) + 1; });
+                sponsors.forEach(r => { if (r.Size) sizeCounts[r.Size] = (sizeCounts[r.Size] || 0) + 1; });
                 const sortedSizes = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]);
                 
                 if (sponsors.length > 0) {
@@ -350,7 +351,10 @@
                     XLSX.utils.sheet_add_aoa(ws, [SPONSOR_COLS], {origin: 'A' + (sponsorRow + 1)});
                     sponsors.forEach((r, i) => XLSX.utils.sheet_add_aoa(ws, [SPONSOR_COLS.map(c => r[c])], {origin: 'A' + (sponsorRow + 2 + i)}));
                     
-                    const sizeRow = sponsorRow + 2 + sponsors.length;
+                    const spacerRow = sponsorRow + 2 + sponsors.length;
+                    const sizeRow = spacerRow + 1;
+                    XLSX.utils.sheet_add_aoa(ws, Array(CAMPER_COLS.length).fill(''), {origin: 'A' + spacerRow});
+                    
                     const sizeRowData = [];
                     CAMPER_COLS.forEach((_, i) => sizeRowData.push(''));
                     sortedSizes.forEach(([size, count], i) => {
