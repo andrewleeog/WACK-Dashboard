@@ -118,7 +118,7 @@
         let currentResults = [];
         
         const CAMPER_COLS = ['Name', 'Gender', 'Grade', 'Church', 'Track', 'Size', 'Medical Info', 'Email'];
-        const SPONSOR_COLS = ['Name', 'Gender', 'Type', 'Church', 'Job Preference', 'Size', 'Email', 'Job Details'];
+        const SPONSOR_COLS = ['Name', 'Gender', 'Type', 'Church', 'Job Preference', 'Size', 'Job Details', 'Email'];
         
         document.addEventListener('DOMContentLoaded', () => {
             init();
@@ -343,7 +343,11 @@
                 const sizeCounts = {};
                 campers.forEach(r => { if (r.Size) sizeCounts[r.Size] = (sizeCounts[r.Size] || 0) + 1; });
                 sponsors.forEach(r => { if (r.Size) sizeCounts[r.Size] = (sizeCounts[r.Size] || 0) + 1; });
-                const sortedSizes = Object.entries(sizeCounts).sort((a, b) => b[1] - a[1]);
+                const sizeOrder = ['Youth S', 'Youth M', 'Youth L', 'Adult S', 'Adult M', 'Adult L'];
+                const sortedSizes = sizeOrder.filter(s => sizeCounts[s]).map(s => [s, sizeCounts[s]]);
+                Object.entries(sizeCounts).forEach(([size, count]) => {
+                    if (!sizeOrder.includes(size)) sortedSizes.push([size, count]);
+                });
                 
                 if (sponsors.length > 0) {
                     const sponsorRow = campers.length + 2;
