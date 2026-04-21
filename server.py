@@ -13,7 +13,7 @@ def init_db():
     conn.execute('DROP TABLE IF EXISTS camper')
     conn.execute('DROP TABLE IF EXISTS sponsor')
     
-    camper = pd.read_csv('WACK_2025_Camper_Registration (1).csv')
+    camper = pd.read_csv('campers.csv')
     camper['Name'] = camper["Child - Person's Name - First Name"] + ' ' + camper["Child - Person's Name - Last Name"]
     camper['Gender'] = camper['Child - Gender']
     camper['Grade'] = camper['Child - Last Grade Completed']
@@ -29,7 +29,7 @@ def init_db():
     camper['Email'] = camper['Email']
     camper.to_sql('camper', conn, index=False, if_exists='replace')
     
-    sponsor = pd.read_csv('WACK_2025_Sponsor_Registration (1).csv')
+    sponsor = pd.read_csv('sponsors.csv')
     sponsor['Name'] = sponsor["Sponsor - Person's Name - First Name"] + ' ' + sponsor["Sponsor - Person's Name - Last Name"]
     sponsor['Gender'] = sponsor['Sponsor - Gender']
     sponsor['Church'] = sponsor.apply(lambda x: x['Sponsor - Church Name'] if x['Sponsor - Church'] == 'Other' else x['Sponsor - Church'], axis=1)
